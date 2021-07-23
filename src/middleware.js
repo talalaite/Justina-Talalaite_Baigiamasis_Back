@@ -10,7 +10,7 @@ module.exports = {
       next();
     } catch (e) {
       console.log(e);
-      return res.status(401).send({ err: "Validation failed" });
+      return res.status(401).send({ error: "Validation failed" });
     }
   },
 };
