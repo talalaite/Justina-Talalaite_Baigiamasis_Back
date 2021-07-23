@@ -4,7 +4,7 @@ const middleware = require("../middleware");
 const mysql = require("mysql2/promise");
 const { mysqlConfig } = require("../config");
 
-router.get("/prducts", middleware.loggedIn, async (req, res) => {
+router.get("/products", middleware.loggedIn, async (req, res) => {
   try {
     const con = await mysql.createConnection(mysqlConfig);
     const [data] = await con.execute(
