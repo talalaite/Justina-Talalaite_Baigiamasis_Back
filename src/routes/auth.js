@@ -23,7 +23,9 @@ router.post("/register", async (req, res) => {
     con.end();
 
     if (data.affectedRows !== 1) {
-      return res.status(500).send({ error: "Error in DB" });
+      return res
+        .status(500)
+        .send({ error: "Database error. Please contact the admin." });
     }
 
     return res.send({ msg: "Successfully registered an account" });
