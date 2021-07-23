@@ -3,26 +3,48 @@ const Joi = require("joi");
 
 const { jwtSecret } = require("./config");
 
-const userSchema = Joi.object({
+const registerSchema = Joi.object({
+  name: Joi.string().name().min(2).max(250).trim().required(),
+  email: Joi.string().email().min(3).max(250).trim().lowercase().required(),
+  password: Joi.string().min(6).max(250),required()
+  });
+
+const loginSchema = Joi.object({
   email: Joi.string().email().max(250).trim().lowercase().required(),
   password: Joi.string().min(6).max(250),required()
 });
 
 module.exports = {
-  async isAuthDataCorrect(req, res, next) {
+  async isRegisterDataCorrect(req, res, next) {
     let userData;
     try {
-      userData = await userSchema.validateAsync({
+      userData = await registerSchema.validateAsync({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+      })
+      req.userData = userData;
+      return next();
+    } catch (e) {
+      return res.status(400).send({ error: "Insufficient data provided" })
+    }
+  },
+
+  async isLoginDataCorrect(req, res, next) {
+    let userData;
+    try {
+      userData = await loginSchema.validateAsync({
         email: req.body.email,
         password: req.body.password,
       });
       req.userData = userData;
       return next();
     } catch (e) {
-      return res.status(400).send({ error: "Incorrect data passed" });
+      return res.status(400).send({ error: "Insufficient data provided" });
     }
   },
-  loggedIn: (req, res, next) => {
+
+  isLoggedIn: (req, res, next) => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
       const decodedToken = jwt.verify(token, jwtSecret);

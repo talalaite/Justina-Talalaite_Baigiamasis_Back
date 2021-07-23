@@ -5,20 +5,17 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 
 const { mysqlConfig, jwtSecret } = require("../config");
+const { isRegisterDataCorrect, isLoginDataCorrect } = require("../middleware");
 
-router.post("/register", async (req, res) => {
-  if (!req.body.email || !req.body.password) {
-    return res.status(400).send({ error: "Insufficient data provided" });
-  }
-
+router.post("/register", isRegisterDataCorrect, async (req, res) => {
   try {
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
 
     const con = await mysql.createConnection(mysqlConfig);
     const [data] = await con.execute(
-      `INSERT INTO users (email, password) VALUES (${mysql.escape(
-        req.body.email
-      )}, '${hashedPassword}')`
+      `INSERT INTO users (name, email, password) VALUES (${mysql.escape(
+        req.userData.name
+      )}, ${mysql.escape(req.body.email)}, '${hashedPassword}')`
     );
     con.end();
 
@@ -37,11 +34,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
-  if (!req.body.email || !req.body.password) {
-    return res.status(400).send({ error: "Insufficient data provided" });
-  }
-
+router.post("/login", isLoginDataCorrect, async (req, res) => {
   try {
     const con = await mysql.createConnection(mysqlConfig);
     const [data] = await con.execute(
