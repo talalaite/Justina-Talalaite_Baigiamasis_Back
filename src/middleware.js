@@ -4,14 +4,14 @@ const Joi = require("joi");
 const { jwtSecret } = require("./config");
 
 const registerSchema = Joi.object({
-  name: Joi.string().name().min(2).max(250).trim().required(),
+  name: Joi.string().min(2).max(250).trim().required(),
   email: Joi.string().email().min(3).max(250).trim().lowercase().required(),
-  password: Joi.string().min(6).max(250),required()
-  });
+  password: Joi.string().min(6).max(250).required(),
+});
 
 const loginSchema = Joi.object({
   email: Joi.string().email().max(250).trim().lowercase().required(),
-  password: Joi.string().min(6).max(250),required()
+  password: Joi.string().min(6).max(250).required(),
 });
 
 module.exports = {
@@ -22,11 +22,11 @@ module.exports = {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-      })
+      });
       req.userData = userData;
       return next();
     } catch (e) {
-      return res.status(400).send({ error: "Insufficient data provided" })
+      return res.status(400).send({ error: "Insufficient data provided" });
     }
   },
 
