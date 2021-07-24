@@ -12,10 +12,25 @@ router.post("/register", isRegisterDataCorrect, async (req, res) => {
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
 
     const con = await mysql.createConnection(mysqlConfig);
+
+    const [user] = await con.execute(
+      `SELECT email FROM users WHERE email = ${mysql.escape(
+        req.userData.email
+      )}`
+    );
+
+    if (user.length) {
+      return res
+        .status(400)
+        .send({ error: "User with this email already exists" });
+    }
+
+    console.log(user);
+
     const [data] = await con.execute(
       `INSERT INTO users (name, email, password) VALUES (${mysql.escape(
         req.userData.name
-      )}, ${mysql.escape(req.body.email)}, '${hashedPassword}')`
+      )}, ${mysql.escape(req.userData.email)}, '${hashedPassword}')`
     );
     con.end();
 
@@ -30,7 +45,7 @@ router.post("/register", isRegisterDataCorrect, async (req, res) => {
     console.log(e);
     res
       .status(500)
-      .send({ error: "Database error. Please contact the admin." });
+      .send({ error: "Unexpected error. Please try again later." });
   }
 });
 
@@ -39,7 +54,7 @@ router.post("/login", isLoginDataCorrect, async (req, res) => {
     const con = await mysql.createConnection(mysqlConfig);
     const [data] = await con.execute(
       `SELECT id, email, password FROM users WHERE email = ${mysql.escape(
-        req.body.email
+        req.userData.email
       )}`
     );
     con.end();
@@ -71,7 +86,7 @@ router.post("/login", isLoginDataCorrect, async (req, res) => {
     console.log(e);
     res
       .status(500)
-      .send({ error: "Database error. Please contact the admin." });
+      .send({ error: "Unexpected error. Please try again later." });
   }
 });
 
